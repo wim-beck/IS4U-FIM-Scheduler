@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunConfig xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="RunSchedulingData.xsd">
+	<GenerateReport>false</GenerateReport>
+	<ClearRunHistory>true</ClearRunHistory>
+	<KeepHistory Days="5" />
+	<DelayInParallelSequence Seconds="2" />
+	<RunHistoryLastExported>2003-04-10T09:39:26</RunHistoryLastExported>
+
+	<!-- Run profiles -->
+	<RunConfiguration Name="FIM" Profile="Full sync">
+		<Step Type="LinearSequence">FIM</Step>
+	</RunConfiguration>
+
+	<!-- Sequences -->
+	<Sequence Name="FIM">
+		<Step Type="ManagementAgent" Action="Full import">FIM</Step>
+		<Step Type="ManagementAgent">FIM</Step>
+	</Sequence>
+</RunConfig>

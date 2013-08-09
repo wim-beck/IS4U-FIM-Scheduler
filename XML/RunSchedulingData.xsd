@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="RunSchedulingData" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="RunConfig">
+	<xs:annotation>
+	  <xs:documentation>Root level node</xs:documentation>
+	</xs:annotation>
+	<xs:complexType>
+	  <xs:sequence maxOccurs="unbounded">
+		<xs:element name="GenerateReport" type="xs:boolean" minOccurs="0" maxOccurs="1">
+		  <xs:annotation>
+			<xs:documentation>Flag indicating whether or not to generate reports.</xs:documentation>
+		  </xs:annotation>
+		</xs:element>
+		<xs:element name="ClearRunHistory" type="xs:boolean" minOccurs="0" maxOccurs="1">
+		  <xs:annotation>
+			<xs:documentation>Flag indicating whether or not to clear the run history.</xs:documentation>
+		  </xs:annotation>
+		</xs:element>
+		<xs:element name="KeepHistory" type="keep-history" minOccurs="0" maxOccurs="1">
+		  <xs:annotation>
+			<xs:documentation>Configuration of how long to keep the runhistory in the FIM console.</xs:documentation>
+		  </xs:annotation>
+		</xs:element>
+		<xs:element name="DelayInParallelSequence" type="delay-in-sequence" minOccurs="0" maxOccurs="1">
+		  <xs:annotation>
+			<xs:documentation>Configuration of the timespan between steps in a parallel sequence.</xs:documentation>
+		  </xs:annotation>
+		</xs:element>
+		<xs:element name="RunHistoryLastExported" type="xs:dateTime" minOccurs="0" maxOccurs="1">
+		  <xs:annotation>
+			<xs:documentation>Timestamp of the last export of the run history.</xs:documentation>
+		  </xs:annotation>
+		</xs:element>
+		<xs:sequence>
+		  <xs:element name="RunConfiguration" type="runconfiguration" minOccurs="1" maxOccurs="unbounded">
+			<xs:annotation>
+			  <xs:documentation>A run configuration is the start of a run in the scheduler. All steps will be executed as a linear sequence.</xs:documentation>
+			</xs:annotation>
+		  </xs:element>
+		</xs:sequence>
+		<xs:sequence>
+		  <xs:element name="Sequence" type="sequence" minOccurs="0" maxOccurs="unbounded">
+			<xs:annotation>
+			  <xs:documentation>Specifies a sequence of steps to execute.</xs:documentation>
+			</xs:annotation>
+		  </xs:element>
+		</xs:sequence>
+	  </xs:sequence>
+	</xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="keep-history">
+	<xs:attribute name="Days" type="xs:int" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="delay-in-sequence">
+	<xs:attribute name="Seconds" type="xs:int" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="runconfiguration">
+	<xs:complexContent>
+	  <xs:extension base="sequence">
+		<xs:attribute name="Profile" type="xs:string" use="required">
+		  <xs:annotation>
+			<xs:documentation>Default run profile to execute.</xs:documentation>
+		  </xs:annotation>
+		</xs:attribute>
+	  </xs:extension>
+	</xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="sequence">
+	<xs:sequence>
+	  <xs:element name="Step" type="step" minOccurs="1" maxOccurs="unbounded">
+		<xs:annotation>
+		  <xs:documentation>Specifies a step to execute.</xs:documentation>
+		</xs:annotation>
+	  </xs:element>
+	</xs:sequence>
+	<xs:attribute name="Name" type="xs:string" use="required">
+	  <xs:annotation>
+		<xs:documentation>Name of the run configuration</xs:documentation>
+	  </xs:annotation>
+	</xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="step">
+	<xs:simpleContent>
+	  <xs:extension base="xs:string">
+		<xs:attribute name="Type" type="stepType" use="required" />
+		<xs:attribute name="Action" type="xs:string" use="optional">
+		  <xs:annotation>
+			<xs:documentation>Action to take. If this is not specified, the default profile of the run configuration will be taken, or the action in a parent sequence if present.</xs:documentation>
+		  </xs:annotation>
+		</xs:attribute>
+	  </xs:extension>
+	</xs:simpleContent>
+  </xs:complexType>
+
+  <xs:simpleType name="stepType">
+	<xs:annotation>
+	  <xs:documentation>Possible step types.</xs:documentation>
+	</xs:annotation>
+	<xs:restriction base="xs:string">
+	  <xs:pattern value="ManagementAgent"/>
+	  <xs:pattern value="LinearSequence"/>
+	  <xs:pattern value="FireOnceNow"/>
+	</xs:restriction>
+  </xs:simpleType>
+</xs:schema>
