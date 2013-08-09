@@ -5,6 +5,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scheduler", "Scheduler\Sche
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RunConfiguration", "RunConfiguration\RunConfiguration.csproj", "{BCC86531-B728-488B-9DEF-D436EF7B1305}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XML", "XML", "{AE4AF31C-FEFD-405A-BE04-4DFCDF242E54}"
+	ProjectSection(SolutionItems) = preProject
+		XML\job_scheduling_data_2_0.xsd = XML\job_scheduling_data_2_0.xsd
+		XML\JobConfiguration.xml = XML\JobConfiguration.xml
+		XML\RunConfiguration.xml = XML\RunConfiguration.xml
+		XML\RunSchedulingData.xsd = XML\RunSchedulingData.xsd
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
