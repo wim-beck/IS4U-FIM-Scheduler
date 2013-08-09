@@ -73,27 +73,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Setup\IS4U FIM Scheduler Installer.nsi" />
-    <None Include="Setup\job_scheduling_data_2_0.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Setup\RunSchedulingData.xsd">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RunConfiguration\RunConfiguration.csproj">
       <Project>{bcc86531-b728-488b-9def-d436ef7b1305}</Project>
       <Name>RunConfiguration</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Setup\headerLogo.bmp" />
-    <Content Include="Setup\installerIcon.ico" />
-    <Content Include="Setup\is4u.gif" />
-    <Content Include="Setup\JobConfiguration.xml" />
-    <Content Include="Setup\LICENSE.txt" />
-    <Content Include="Setup\RunConfiguration.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
