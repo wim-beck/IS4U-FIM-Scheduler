@@ -17,7 +17,6 @@
  * here: http://opensource.org/licenses/gpl-3.0.
  */
 using System.ServiceProcess;
-using System;
 
 namespace IS4U.Scheduler
 {

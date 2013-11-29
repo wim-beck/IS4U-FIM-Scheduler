@@ -21,96 +21,116 @@ using System.Collections.Specialized;
 using System.IO;
 using System.ServiceProcess;
 using Microsoft.Win32;
+using NLog;
+using NLog.Config;
 using Quartz;
 using Quartz.Impl;
 
 namespace IS4U.Scheduler
 {
-    public partial class Scheduler : ServiceBase
-    {
-        private const string CONFIG_FILE = "JobConfiguration.xml";
-        private const string SCHEDULER_KEY = @"SYSTEM\CurrentControlSet\Services\IS4UFimScheduler";
+	public partial class Scheduler : ServiceBase
+	{
+		private const string CONFIG_FILE = "JobConfiguration.xml";
+		private const string LOG_CONFIG_FILE = "LogConfiguration.xml";
+		private const string SCHEDULER_KEY = @"SYSTEM\CurrentControlSet\Services\IS4UFimScheduler";
 
-        private static string workingDirectory;
-        private IScheduler scheduler;
+		private static string workingDirectory;
+		private IScheduler scheduler;
+		private Logger logger;
 
-        public Scheduler()
-        {
-            InitializeComponent();
-            ServiceName = "IS4U FIM Scheduler";
-            CanPauseAndContinue = true;
+		public Scheduler()
+		{
+			InitializeComponent();
+			ServiceName = "IS4U FIM Scheduler";
+			CanPauseAndContinue = true;
 
-            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(SCHEDULER_KEY, false))
-            {
-                if (key != null)
-                {
-                    workingDirectory = key.GetValue("Location").ToString();
-                }
-            }
-        }
+			using (RegistryKey key = Registry.LocalMachine.OpenSubKey(SCHEDULER_KEY, false))
+			{
+				if (key != null)
+				{
+					workingDirectory = key.GetValue("Location").ToString();
+				}
+			}
+		}
 
-        protected override void OnStart(string[] args)
-        {
-            if (!string.IsNullOrEmpty(workingDirectory))
-            {
-                string jobConfigurationFile = Path.Combine(workingDirectory, CONFIG_FILE);
-                if (!string.IsNullOrEmpty(jobConfigurationFile) && File.Exists(jobConfigurationFile))
-                {
-                    NameValueCollection properties = new NameValueCollection();
-                    properties["quartz.scheduler.instanceName"] = "XmlConfiguredInstance";
+		protected override void OnStart(string[] args)
+		{
+			if (!string.IsNullOrEmpty(workingDirectory))
+			{
+				string logConfigurationfile = Path.Combine(workingDirectory, LOG_CONFIG_FILE);
+				if (!string.IsNullOrEmpty(logConfigurationfile) && File.Exists(logConfigurationfile))
+				{
+					LogManager.Configuration = new XmlLoggingConfiguration(logConfigurationfile);
+					logger = LogManager.GetLogger("");
+					string jobConfigurationFile = Path.Combine(workingDirectory, CONFIG_FILE);
+					if (!string.IsNullOrEmpty(jobConfigurationFile) && File.Exists(jobConfigurationFile))
+					{
+						NameValueCollection properties = new NameValueCollection();
+						properties["quartz.scheduler.instanceName"] = "XmlConfiguredInstance";
 
-                    // set thread pool info
-                    properties["quartz.threadPool.type"] = "Quartz.Simpl.SimpleThreadPool, Quartz";
-                    properties["quartz.threadPool.threadCount"] = "5";
-                    properties["quartz.threadPool.threadPriority"] = "Normal";
+						// set thread pool info
+						properties["quartz.threadPool.type"] = "Quartz.Simpl.SimpleThreadPool, Quartz";
+						properties["quartz.threadPool.threadCount"] = "5";
+						properties["quartz.threadPool.threadPriority"] = "Normal";
 
-                    // plugin handles reading xml configuration
-                    properties["quartz.plugin.xml.type"] = "Quartz.Plugin.Xml.XMLSchedulingDataProcessorPlugin, Quartz";
-                    properties["quartz.plugin.xml.fileNames"] = jobConfigurationFile;
-                    properties["quartz.plugin.xml.scanInterval"] = "120";
+						// plugin handles reading xml configuration
+						properties["quartz.plugin.xml.type"] = "Quartz.Plugin.Xml.XMLSchedulingDataProcessorPlugin, Quartz";
+						properties["quartz.plugin.xml.fileNames"] = jobConfigurationFile;
+						properties["quartz.plugin.xml.scanInterval"] = "120";
 
-                    ISchedulerFactory schedulerFactory = new StdSchedulerFactory(properties);
-                    scheduler = schedulerFactory.GetScheduler();
-                    scheduler.Start();
-                }
-                else
-                {
-                    throw new Exception("Job configuration file not found.");
-                }
-            }
-            else
-            {
-                // TODO : LOGGING
-                throw new Exception("Working directory not found.");
-            }
-        }
+						ISchedulerFactory schedulerFactory = new StdSchedulerFactory(properties);
+						logger.Info("Scheduler factory initialized.");
+						scheduler = schedulerFactory.GetScheduler();
+						scheduler.Start();
+						logger.Info("Scheduler started.");
+					}
+					else
+					{
+						logger.Error(string.Format("Job configuration file not found in '{0}' folder.", workingDirectory));
+						throw new Exception("Job configuration file not found.");
+					}
+				}
+				else
+				{
+					throw new Exception("Log configuration file not found.");
+				}
+			}
+			else
+			{
+				throw new Exception("Working directory not found.");
+			}
+		}
 
-        protected override void OnPause()
-        {
-            if (scheduler.GetCurrentlyExecutingJobs().Count == 0)
-            {
-                base.OnPause();
-                scheduler.PauseAll();
-            }
-            else
-            {
-                throw new Exception("Service cannot be paused while job is running.");
-            }
-        }
+		protected override void OnPause()
+		{
+			if (scheduler.GetCurrentlyExecutingJobs().Count == 0)
+			{
+				base.OnPause();
+				scheduler.PauseAll();
+				logger.Info("Scheduler paused.");
+			}
+			else
+			{
+				logger.Warn("Service cannot be paused while job is running.");
+				throw new Exception("Service cannot be paused while job is running.");
+			}
+		}
 
-        protected override void OnContinue()
-        {
-            base.OnContinue();
-            scheduler.ResumeAll();
-        }
+		protected override void OnContinue()
+		{
+			base.OnContinue();
+			scheduler.ResumeAll();
+			logger.Info("Scheduler resumed.");
+		}
 
-        protected override void OnStop()
-        {
-            foreach (IJobExecutionContext job in scheduler.GetCurrentlyExecutingJobs())
-            {
-                scheduler.Interrupt(job.JobDetail.Key);
-            }
-            scheduler.Shutdown();
-        }
-    }
+		protected override void OnStop()
+		{
+			foreach (IJobExecutionContext job in scheduler.GetCurrentlyExecutingJobs())
+			{
+				scheduler.Interrupt(job.JobDetail.Key);
+				logger.Info(string.Format("Scheduler interrupted '{0}' job while stopping the service.", job.JobDetail.Key));
+			}
+			scheduler.Shutdown();
+		}
+	}
 }

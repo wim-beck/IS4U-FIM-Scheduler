@@ -7,13 +7,20 @@
 	<RunHistoryLastExported>2003-04-10T09:39:26</RunHistoryLastExported>
 
 	<!-- Run profiles -->
-	<RunConfiguration Name="FIM" Profile="Full sync">
+	<RunConfiguration Name="Full" Profile="Full import full sync">
 		<Step Type="LinearSequence">FIM</Step>
+		<Step Type="ManagementAgent" Action="Delta import delta sync">FIM MA</Step>
+	</RunConfiguration>
+	<RunConfiguration Name="Delta" Profile="Delta import delta sync">
+		<Step Type="LinearSequence">FIM</Step>
+		<Step Type="ManagementAgent">FIM MA</Step>
 	</RunConfiguration>
 
 	<!-- Sequences -->
 	<Sequence Name="FIM">
-		<Step Type="ManagementAgent" Action="Full import">FIM</Step>
-		<Step Type="ManagementAgent">FIM</Step>
+		<Step Type="ManagementAgent">FIM MA</Step>
+		<Step Type="ManagementAgent" Action="Export">AD MA</Step>
+		<Step Type="ManagementAgent">AD MA</Step>
+		<Step Type="ManagementAgent" Action="Export">FIM MA</Step>
 	</Sequence>
 </RunConfig>

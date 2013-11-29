@@ -20,8 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using IS4U.RunConfiguration;
-using NLog;
 
 namespace IS4U.RunConfiguration
 {
@@ -44,7 +42,7 @@ namespace IS4U.RunConfiguration
 		/// </summary>
 		/// <param name="sequence"></param>
 		/// <param name="logger"></param>
-		public Sequence(XElement sequence, Logger logger)
+		public Sequence(XElement sequence)
 		{
 			if (sequence.Attribute("Name") != null)
 			{
@@ -55,7 +53,7 @@ namespace IS4U.RunConfiguration
 				Name = Guid.NewGuid().ToString();
 			}
 			Steps = (from step in sequence.Elements("Step")
-							 select Step.GetStep(step, logger)).ToList();
+							 select Step.GetStep(step)).ToList();
 		}
 
 	}

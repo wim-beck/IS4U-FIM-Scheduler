@@ -29,6 +29,8 @@ namespace IS4U.RunConfiguration
 	/// </summary>
 	public abstract class Step
 	{
+		private Logger logger = LogManager.GetLogger("");
+
 		#region Properties
 
 		/// <summary>
@@ -59,10 +61,9 @@ namespace IS4U.RunConfiguration
 		/// Method that returns one of the subtypes of Step.
 		/// </summary>
 		/// <param name="xmlStep">Xml configuration of the step.</param>
-		/// <param name="logger">Logger.</param>
 		/// <returns>Step.</returns>
 		/// <throws>Exception if type is null or not recognized; if the xml configuration is null.</throws>
-		public static Step GetStep(XElement xmlStep, Logger logger)
+		public static Step GetStep(XElement xmlStep)
 		{
 			if (xmlStep != null)
 			{
@@ -104,22 +105,12 @@ namespace IS4U.RunConfiguration
 		/// <param name="fimWmiNamespace">FIM WMI namespace.</param>
 		public virtual void Initialize(Dictionary<string, List<Step>> sequences, string defaultProfile, int count, string fimWmiNamespace)
 		{
-			Logger logger = LogManager.GetLogger("Scheduler");
 			Count = count + 1;
 			if (Count > 1)
 			{
 				// Break circular reference by emptying the list of steps.
 				StepsToRun = new List<Step>();
-				if (logger.IsFatalEnabled)
-				{
-					string message = "Circular reference to this step.";
-					LogEventInfo logEventInfo = new LogEventInfo(LogLevel.Fatal, logger.Name, message);
-					logEventInfo.Properties["ID"] = Guid.NewGuid().ToString();
-					logEventInfo.Properties["Class"] = this.GetType().Name;
-					logEventInfo.Properties["Data"] = Name;
-					logEventInfo.Properties["Code"] = 10008;
-					logger.Log(logEventInfo);
-				}
+				logger.Error(string.Format("Circular reference to this step: '{0}'.", Name));
 			}
 			else
 			{
@@ -136,14 +127,9 @@ namespace IS4U.RunConfiguration
 						step.Initialize(sequences, DefaultRunProfile, count, fimWmiNamespace);
 					}
 				}
-				else if (logger.IsFatalEnabled)
+				else
 				{
-					LogEventInfo logEventInfo = new LogEventInfo(LogLevel.Fatal, logger.Name, "Sequence not found.");
-					logEventInfo.Properties["ID"] = Guid.NewGuid().ToString();
-					logEventInfo.Properties["Class"] = this.GetType().Name;
-					logEventInfo.Properties["Data"] = Name;
-					logEventInfo.Properties["Code"] = 10009;
-					logger.Log(logEventInfo);
+					logger.Error(string.Format("Sequence '{0}' not found.", Name));
 				}
 			}
 		}

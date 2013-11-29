@@ -29,9 +29,8 @@ namespace IS4U.RunConfiguration
 	/// </summary>
 	public class ManagementAgent : Step
 	{
-
-		private Logger logger;
 		private string fimWmiNamespace;
+		private Logger logger = LogManager.GetLogger("");
 
 		/// <summary>
 		/// Default constructor.
@@ -70,7 +69,6 @@ namespace IS4U.RunConfiguration
 		public override void Initialize(Dictionary<string, List<Step>> sequences, string defaultProfile, int count, string fimWmiNamespace)
 		{
 			DefaultRunProfile = defaultProfile;
-			logger = LogManager.GetLogger("Scheduler");
 			this.fimWmiNamespace = fimWmiNamespace;
 		}
 
@@ -95,43 +93,17 @@ namespace IS4U.RunConfiguration
 					{
 						using (ManagementObject wmiMaObject = obj)
 						{
-							if (logger.IsInfoEnabled)
-							{
-								LogEventInfo logEventInfo = new LogEventInfo(LogLevel.Info, logger.Name, "Management agent started.");
-								logEventInfo.Properties["ID"] = Guid.NewGuid().ToString();
-								logEventInfo.Properties["MaName"] = Name;
-								logEventInfo.Properties["Class"] = this.GetType().Name;
-								logEventInfo.Properties["Data"] = string.Format("Run profile: {0}", runProfile);
-								logEventInfo.Properties["Code"] = 10010;
-								logger.Log(logEventInfo);
-							}
+							logger.Info(string.Format("Management agent '{0}' started.", Name));
 							string status = wmiMaObject.InvokeMethod("Execute", new object[] { runProfile }).ToString();
-							if (logger.IsInfoEnabled)
-							{
-								LogEventInfo logEventInfo = new LogEventInfo(LogLevel.Info, logger.Name, "Management agent finished.");
-								logEventInfo.Properties["ID"] = Guid.NewGuid().ToString();
-								logEventInfo.Properties["MaName"] = Name;
-								logEventInfo.Properties["Class"] = this.GetType().Name;
-								logEventInfo.Properties["Data"] = string.Format("Run profile '{0}' exited with status '{1}'", runProfile, status);
-								logEventInfo.Properties["Code"] = 10011;
-								logger.Log(logEventInfo);
-							}
+							logger.Info(string.Format("Management agent '{0}' finished '{1}' with status '{2}'.", Name, runProfile,status));
 						}
 					}
 				}
 			}
 			catch (Exception exc)
 			{
-				if (logger.IsErrorEnabled)
-				{
-					LogEventInfo logEventInfo = new LogEventInfo(LogLevel.Error, logger.Name, "Exception occurred during manqgement agent run");
-					logEventInfo.Properties["ID"] = Guid.NewGuid().ToString();
-					logEventInfo.Properties["MaName"] = Name;
-					logEventInfo.Properties["Class"] = this.GetType().Name;
-					logEventInfo.Properties["Data"] = string.Format("{0}, message: {1}", exc.GetType().Name, exc.Message);
-					logEventInfo.Properties["Code"] = 10012;
-					logger.Log(logEventInfo);
-				}
+				string message = string.Format("Exception '{0}' occurred during manqgement agent run, message: '{1}'", exc.GetType().Name, exc.Message);
+				logger.Error(message);
 			}
 		}
 	}

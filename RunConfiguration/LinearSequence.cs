@@ -19,7 +19,6 @@
 using System;
 using System.Linq;
 using System.Xml.Linq;
-using NLog;
 
 namespace IS4U.RunConfiguration
 {
@@ -38,7 +37,7 @@ namespace IS4U.RunConfiguration
 		/// </summary>
 		/// <param name="runConfig">Xml configuration.</param>
 		/// <param name="logger">Logger.</param>
-		public LinearSequence(XElement runConfig, Logger logger)
+		public LinearSequence(XElement runConfig)
 		{
 			if (runConfig.Attribute("Name") != null)
 			{
@@ -57,7 +56,7 @@ namespace IS4U.RunConfiguration
 				DefaultRunProfile = Guid.NewGuid().ToString();
 			}
 			StepsToRun = (from step in runConfig.Elements("Step")
-										select GetStep(step, logger)).ToList();
+										select GetStep(step)).ToList();
 			Count = 0;
 		}
 
