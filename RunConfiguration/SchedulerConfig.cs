@@ -56,6 +56,10 @@ namespace IS4U.RunConfiguration
 		/// </summary>
 		public static int DelayInParallelSequence { get; internal set; }
 		/// <summary>
+		/// Delay between start of the management agent runs in a linear sequence.
+		/// </summary>
+		public static int DelayInLinearSequence { get; internal set; }
+		/// <summary>
 		/// Last exported run history timestamp.
 		/// </summary>
 		public DateTime RunHistoryExported { get; internal set; }
@@ -90,6 +94,7 @@ namespace IS4U.RunConfiguration
 				setClearRunHistory(root.Element("ClearRunHistory"));
 				setKeepHistory(root.Element("KeepHistory"));
 				setDelayInParallelSequence(root.Element("DelayInParallelSequence"));
+				setDelayInLinearSequence(root.Element("DelayInLinearSequence"));
 				setRunHistoryExported(root.Element("RunHistoryLastExported"));
 				Sequences = (from sequence in root.Elements("Sequence")
 								 select new Sequence(sequence)).ToDictionary(seq => seq.Name, seq => seq.Steps,
@@ -303,6 +308,25 @@ namespace IS4U.RunConfiguration
 				catch (FormatException fe)
 				{
 					throw new Exception("DelayInParallelSequence is not a valid number: " + fe.Message);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Sets the number of seconds to wait between steps in a linear sequence.
+		/// </summary>
+		/// <param name="delay">Xelement containing the xml configuration.</param>
+		private void setDelayInLinearSequence(XElement delay)
+		{
+			if (delay != null && delay.Attribute("Seconds") != null)
+			{
+				try
+				{
+					DelayInLinearSequence = Convert.ToInt32(delay.Attribute("Seconds").Value);
+				}
+				catch (FormatException fe)
+				{
+					throw new Exception("DelayInLinearSequence is not a valid number: " + fe.Message);
 				}
 			}
 		}

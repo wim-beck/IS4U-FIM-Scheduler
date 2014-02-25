@@ -19,6 +19,7 @@
 using System;
 using System.Linq;
 using System.Xml.Linq;
+using System.Threading;
 
 namespace IS4U.RunConfiguration
 {
@@ -65,9 +66,11 @@ namespace IS4U.RunConfiguration
 		/// </summary>
 		public override void Run()
 		{
+			int delay = SchedulerConfig.DelayInLinearSequence * 1000;
 			foreach (Step step in StepsToRun)
 			{
 				step.Run();
+				Thread.Sleep(delay);
 			}
 		}
 	}
