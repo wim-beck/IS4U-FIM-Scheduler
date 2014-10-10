@@ -18,7 +18,6 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Xml.Linq;
 using NLog;
 
@@ -103,7 +102,7 @@ namespace IS4U.RunConfiguration
 		/// <param name="defaultProfile">Default run profile.</param>
 		/// <param name="count">Number of times this method is called.</param>
 		/// <param name="fimWmiNamespace">FIM WMI namespace.</param>
-		public virtual void Initialize(Dictionary<string, List<Step>> sequences, string defaultProfile, int count, string fimWmiNamespace)
+		public virtual void Initialize(Dictionary<string, List<Step>> sequences, string defaultProfile, int count)
 		{
 			Count = count + 1;
 			if (Count > 1)
@@ -124,7 +123,7 @@ namespace IS4U.RunConfiguration
 					StepsToRun = sequences[Name];
 					foreach (Step step in StepsToRun)
 					{
-						step.Initialize(sequences, DefaultRunProfile, count, fimWmiNamespace);
+						step.Initialize(sequences, DefaultRunProfile, count);
 					}
 				}
 				else
@@ -133,53 +132,5 @@ namespace IS4U.RunConfiguration
 				}
 			}
 		}
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="sequences"></param>
-		/// <param name="defaultProfile"></param>
-		/// <param name="count"></param>
-		/// <param name="id"></param>
-		/// <returns></returns>
-		public virtual XElement GetContent(Dictionary<string, List<Step>> sequences, string defaultProfile, int count, string id)
-		{
-			Count = count + 1;
-			if (Count > 1)
-			{
-				return new XElement("Step",
-					new XAttribute("Type", "Circular Reference"),
-					new XAttribute("ID", id),
-					Name);
-			}
-			else
-			{
-				if (sequences.ContainsKey(Name))
-				{
-					string stepId = string.Concat(id, Name, "_");
-					DefaultRunProfile = defaultProfile;
-					if (!string.IsNullOrEmpty(Action))
-					{
-						DefaultRunProfile = Action;
-						stepId = string.Concat(stepId, Action, "_");
-					}
-					return new XElement("Step",
-						new XAttribute("Name", Name),
-						new XAttribute("Type", GetType().Name),
-						new XAttribute("ID", stepId),
-						from Step step in sequences[Name]
-						select step.GetContent(sequences, DefaultRunProfile, count, stepId));
-				}
-				else
-				{
-					return new XElement("Step",
-					new XAttribute("Type", "Not Found"),
-					new XAttribute("ID", id),
-					Name);
-				}
-			}
-		}
-
 	}
 }

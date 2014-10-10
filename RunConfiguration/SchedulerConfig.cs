@@ -24,6 +24,7 @@ using System.Linq;
 using System.Management;
 using System.Xml.Linq;
 using Ionic.Zip;
+using IS4U.Constants;
 using NLog;
 
 namespace IS4U.RunConfiguration
@@ -33,10 +34,8 @@ namespace IS4U.RunConfiguration
 	/// </summary>
 	public class SchedulerConfig
 	{
-		private const string RUNHISTORY_OUTPUT_DIR = "RunHistory";
-
-		private string xslt = string.Format(@"type='text/xsl' href='{0}\ShowRunHistory.xsl'", RUNHISTORY_OUTPUT_DIR);
-		public string FIM_WMI_NAMESPACE { get { return @"root\MicrosoftIdentityIntegrationServer"; } }
+		private string xslt = string.Format(@"type='text/xsl' href='{0}\{1}'", Constant.RUNHISTORY_OUTPUT_DIR, Constant.RUNHISTORY_XSL);
+		
 		private Logger logger = LogManager.GetLogger("");
 
 		/// <summary>
@@ -73,6 +72,10 @@ namespace IS4U.RunConfiguration
 		/// Value: list of steps in the sequence.
 		/// </summary>
 		public Dictionary<string, List<Step>> Sequences { get; internal set; }
+		/// <summary>
+		/// On demand schedule name.
+		/// </summary>
+		public static string OnDemandSchedule { get; private set; }
 
 		private string configFile;
 
@@ -96,6 +99,7 @@ namespace IS4U.RunConfiguration
 				setDelayInParallelSequence(root.Element("DelayInParallelSequence"));
 				setDelayInLinearSequence(root.Element("DelayInLinearSequence"));
 				setRunHistoryExported(root.Element("RunHistoryLastExported"));
+				setOnDemandSchedule(root.Element("OnDemandSchedule"));
 				Sequences = (from sequence in root.Elements("Sequence")
 								 select new Sequence(sequence)).ToDictionary(seq => seq.Name, seq => seq.Steps,
 																							StringComparer.CurrentCultureIgnoreCase);
@@ -109,20 +113,45 @@ namespace IS4U.RunConfiguration
 		}
 
 		/// <summary>
-		/// 
+		/// This method will run the passed run configuration, if it is present in the configuration.
 		/// </summary>
-		public void DoHouseKeeping()
+		/// <param name="runConfigurationName">Desired run configuration.</param>
+		public void Run(string runConfigurationName)
 		{
-			if (GenerateReport)
+			if (RunConfigurations.ContainsKey(runConfigurationName))
 			{
-				generateReport();
-				DateTime utcNow = DateTime.UtcNow;
-				saveRunHistoryLastExported(utcNow.ToLocalTime());
+				LinearSequence runConfiguration = RunConfigurations[runConfigurationName];
+				foreach (Step step in runConfiguration.StepsToRun)
+				{
+					// we pass the third parameter to allow execution of several run profiles and
+					// because different run profiles can contain the same sequences.
+					step.Initialize(Sequences, runConfiguration.DefaultRunProfile, 0);
+					step.Run();
+					logger.Info("Running step: " + step.Name);
+				}
+				if (GenerateReport)
+				{
+					generateReport();
+					DateTime utcNow = DateTime.UtcNow;
+					saveRunHistoryLastExported(utcNow.ToLocalTime());
+				}
+				if (ClearRunHistory)
+				{
+					clearRunHistory();
+				}
 			}
-			if (ClearRunHistory)
+			else
 			{
-				clearRunHistory();
+				logger.Error(string.Format("Run configuration '{0}' not found.", runConfigurationName));
 			}
+		}
+
+		/// <summary>
+		/// Run on demand schedule.
+		/// </summary>
+		public void RunOnDemand()
+		{
+			Run(OnDemandSchedule);
 		}
 
 		/// <summary>
@@ -141,9 +170,9 @@ namespace IS4U.RunConfiguration
 
 			XProcessingInstruction xsl = new XProcessingInstruction("xml-stylesheet", xslt);
 			string year = DateTime.Now.ToString("yyyy");
-			string zipFile = Path.Combine(RUNHISTORY_OUTPUT_DIR, string.Concat("RunHistory_", year, ".zip"));
+			string zipFile = Path.Combine(Constant.RUNHISTORY_OUTPUT_DIR, string.Concat("RunHistory_", year, ".zip"));
 
-			ManagementScope mgmtScope = new ManagementScope(FIM_WMI_NAMESPACE);
+			ManagementScope mgmtScope = new ManagementScope(Constant.FIM_WMI_NAMESPACE);
 			SelectQuery query = new SelectQuery(string.Format("Select * from MIIS_RunHistory"));
 			using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(mgmtScope, query))
 			{
@@ -162,7 +191,7 @@ namespace IS4U.RunConfiguration
 						filePath = Path.Combine(filePath, fileName);
 						XElement maRunHistory = XElement.Parse(obj.InvokeMethod("RunDetails", null).ToString());
 						XDocument doc = new XDocument(xsl, maRunHistory);
-						string outputFile = Path.Combine(RUNHISTORY_OUTPUT_DIR, string.Concat(maName, ".xml"));
+						string outputFile = Path.Combine(Constant.RUNHISTORY_OUTPUT_DIR, string.Concat(maName, ".xml"));
 						doc.Save(outputFile);
 						using (ZipFile zip = new ZipFile(zipFile))
 						{
@@ -220,7 +249,7 @@ namespace IS4U.RunConfiguration
 
 				logger.Info(string.Concat("Clear run history before ", local.ToString("yyyy-MM-dd HH:mm:ss")));
 
-				ManagementScope mgmtScope = new ManagementScope(FIM_WMI_NAMESPACE);
+				ManagementScope mgmtScope = new ManagementScope(Constant.FIM_WMI_NAMESPACE);
 				SelectQuery query = new SelectQuery("Select * from MIIS_Server");
 				using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(mgmtScope, query))
 				{
@@ -351,26 +380,15 @@ namespace IS4U.RunConfiguration
 		}
 
 		/// <summary>
-		/// Return scheduler configuration.
+		/// Sets the on demand schedule.
 		/// </summary>
-		/// <returns>Xml configuration.</returns>
-		public XElement GetContent()
+		/// <param name="delay">Xelement containing the xml configuration.</param>
+		private void setOnDemandSchedule(XElement onDemandSchedule)
 		{
-			return new XElement("RunConfig",
-				 new XElement("GenerateReport", GenerateReport),
-				 new XElement("ClearRunHistory", ClearRunHistory),
-				 new XElement("KeepHistory", new XAttribute("Days", KeepHistory)),
-				 new XElement("DelayInParallelSequence", new XAttribute("Seconds", DelayInParallelSequence)),
-				 new XElement("RunHistoryLastExported", RunHistoryExported.ToString("yyyy-MM-dd HH:mm:ss")),
-				 from LinearSequence runConfig in RunConfigurations.Values
-				 select
-					  new XElement("RunConfiguration",
-					  new XAttribute("Name", runConfig.Name),
-					  new XAttribute("Profile", runConfig.DefaultRunProfile),
-					  from Step step in runConfig.StepsToRun
-					  select
-							step.GetContent(Sequences, runConfig.DefaultRunProfile, 0, string.Concat(runConfig.Name, "_"))));
+			if (onDemandSchedule != null)
+			{
+				OnDemandSchedule = onDemandSchedule.Value;
+			}
 		}
-
 	}
 }

@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Management;
-using System.Xml.Linq;
+using IS4U.Constants;
 using NLog;
 
 namespace IS4U.RunConfiguration
@@ -29,34 +29,12 @@ namespace IS4U.RunConfiguration
 	/// </summary>
 	public class ManagementAgent : Step
 	{
-		private string fimWmiNamespace;
 		private Logger logger = LogManager.GetLogger("");
 
 		/// <summary>
 		/// Default constructor.
 		/// </summary>
 		public ManagementAgent() { }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="sequences"></param>
-		/// <param name="defaultProfile"></param>
-		/// <param name="count"></param>
-		/// <param name="id"></param>
-		/// <returns></returns>
-		public override XElement GetContent(Dictionary<string, List<Step>> sequences, string defaultProfile, int count, string id)
-		{
-			string runProfile = defaultProfile;
-			if (!string.IsNullOrEmpty(Action))
-			{
-				runProfile = Action;
-			}
-			return new XElement("Step",
-				new XAttribute("Type", GetType().Name),
-				new XAttribute("Action", runProfile),
-				Name);
-		}
 
 		/// <summary>
 		/// Initialize method. This will initialize the default run profile.
@@ -66,10 +44,9 @@ namespace IS4U.RunConfiguration
 		/// <param name="defaultProfile">Default run profile.</param>
 		/// <param name="count">Number of times this method is called.</param>
 		/// <param name="fimWmiNamespace">FIM WMI namespace.</param>
-		public override void Initialize(Dictionary<string, List<Step>> sequences, string defaultProfile, int count, string fimWmiNamespace)
+		public override void Initialize(Dictionary<string, List<Step>> sequences, string defaultProfile, int count)
 		{
 			DefaultRunProfile = defaultProfile;
-			this.fimWmiNamespace = fimWmiNamespace;
 		}
 
 		/// <summary>
@@ -85,7 +62,7 @@ namespace IS4U.RunConfiguration
 			}
 			try
 			{
-				ManagementScope mgmtScope = new ManagementScope(fimWmiNamespace);
+				ManagementScope mgmtScope = new ManagementScope(Constant.FIM_WMI_NAMESPACE);
 				SelectQuery query = new SelectQuery(string.Format("Select * from MIIS_ManagementAgent where name='{0}'", Name));
 				using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(mgmtScope, query))
 				{

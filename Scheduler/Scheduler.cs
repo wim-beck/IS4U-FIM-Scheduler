@@ -20,6 +20,9 @@ using System;
 using System.Collections.Specialized;
 using System.IO;
 using System.ServiceProcess;
+using System.Threading;
+using IS4U.Constants;
+using IS4U.RunConfiguration;
 using Microsoft.Win32;
 using NLog;
 using NLog.Config;
@@ -30,9 +33,11 @@ namespace IS4U.Scheduler
 {
 	public partial class Scheduler : ServiceBase
 	{
-		private const string CONFIG_FILE = "JobConfiguration.xml";
-		private const string LOG_CONFIG_FILE = "LogConfiguration.xml";
-		private const string SCHEDULER_KEY = @"SYSTEM\CurrentControlSet\Services\IS4UFimScheduler";
+		private const int ONDEMAND = 234;
+		private DateTime StartSignal;
+		private DateTime LastEndTime;
+		private Thread worker;
+		private string runConfigurationFile;
 
 		private static string workingDirectory;
 		private IScheduler scheduler;
@@ -44,7 +49,7 @@ namespace IS4U.Scheduler
 			ServiceName = "IS4U FIM Scheduler";
 			CanPauseAndContinue = true;
 
-			using (RegistryKey key = Registry.LocalMachine.OpenSubKey(SCHEDULER_KEY, false))
+			using (RegistryKey key = Registry.LocalMachine.OpenSubKey(Constant.SCHEDULER_KEY, false))
 			{
 				if (key != null)
 				{
@@ -53,16 +58,68 @@ namespace IS4U.Scheduler
 			}
 		}
 
+		/// <summary>
+		/// On demand event listener.
+		/// </summary>
+		/// <param name="command"></param>
+		protected override void OnCustomCommand(int command)
+		{
+			if (command == ONDEMAND)
+			{
+				StartSignal = DateTime.Now;
+			}
+		}
+
+		/// <summary>
+		/// Ondemand thread.
+		/// </summary>
+		private void DoWork()
+		{
+			StartSignal = DateTime.MinValue;
+			LastEndTime = DateTime.MinValue;
+			while (true)
+			{
+				if (scheduler.GetCurrentlyExecutingJobs().Count == 0)
+				{
+					scheduler.PauseAll();
+					if (DateTime.Compare(StartSignal, LastEndTime) > 0)
+					{
+						StartSignal = DateTime.Now;
+						LastEndTime = StartSignal;
+
+						SchedulerConfig schedulerConfig = new SchedulerConfig(runConfigurationFile);
+						if (schedulerConfig != null)
+						{
+							schedulerConfig.RunOnDemand();
+						}
+						else
+						{
+							logger.Error("Scheduler configuration not found.");
+							throw new JobExecutionException("Scheduler configuration not found.");
+						}
+					}
+					scheduler.ResumeAll();
+				}
+				// 5 second delay
+				Thread.Sleep(5000);
+			}
+		}
+
+		/// <summary>
+		/// This method should end in a reasonable amount of time. It is used to start one or multiple threads.
+		/// </summary>
+		/// <param name="args"></param>
 		protected override void OnStart(string[] args)
 		{
 			if (!string.IsNullOrEmpty(workingDirectory))
 			{
-				string logConfigurationfile = Path.Combine(workingDirectory, LOG_CONFIG_FILE);
-				if (!string.IsNullOrEmpty(logConfigurationfile) && File.Exists(logConfigurationfile))
+				runConfigurationFile = Path.Combine(workingDirectory, Constant.RUN_CONFIG_FILE);
+				string logConfigurationFile = Path.Combine(workingDirectory, Constant.LOG_CONFIG_FILE);
+				if (!string.IsNullOrEmpty(logConfigurationFile) && File.Exists(logConfigurationFile))
 				{
-					LogManager.Configuration = new XmlLoggingConfiguration(logConfigurationfile);
+					LogManager.Configuration = new XmlLoggingConfiguration(logConfigurationFile);
 					logger = LogManager.GetLogger("");
-					string jobConfigurationFile = Path.Combine(workingDirectory, CONFIG_FILE);
+					string jobConfigurationFile = Path.Combine(workingDirectory, Constant.JOB_CONFIG_FILE);
 					if (!string.IsNullOrEmpty(jobConfigurationFile) && File.Exists(jobConfigurationFile))
 					{
 						NameValueCollection properties = new NameValueCollection();
@@ -99,8 +156,16 @@ namespace IS4U.Scheduler
 			{
 				throw new Exception("Working directory not found.");
 			}
+			worker = new Thread(DoWork);
+			worker.Name = "MyWorker";
+			worker.IsBackground = false;
+			worker.Start();
 		}
 
+		/// <summary>
+		/// Pause method. Will stop the scheduler if no jobs are running.
+		/// TODO: implement on demand pause.
+		/// </summary>
 		protected override void OnPause()
 		{
 			if (scheduler.GetCurrentlyExecutingJobs().Count == 0)
@@ -116,6 +181,10 @@ namespace IS4U.Scheduler
 			}
 		}
 
+		/// <summary>
+		/// Continue method. Resumes the scheduler.
+		/// TODO: implement on demand continue.
+		/// </summary>
 		protected override void OnContinue()
 		{
 			base.OnContinue();
@@ -123,6 +192,9 @@ namespace IS4U.Scheduler
 			logger.Info("Scheduler resumed.");
 		}
 
+		/// <summary>
+		/// Stops the scheduler, aborting all running jobs. Aborts the ondemand thread.
+		/// </summary>
 		protected override void OnStop()
 		{
 			foreach (IJobExecutionContext job in scheduler.GetCurrentlyExecutingJobs())
@@ -131,6 +203,8 @@ namespace IS4U.Scheduler
 				logger.Info(string.Format("Scheduler interrupted '{0}' job while stopping the service.", job.JobDetail.Key));
 			}
 			scheduler.Shutdown();
+			worker.Abort();
+			base.OnStop();
 		}
 	}
 }

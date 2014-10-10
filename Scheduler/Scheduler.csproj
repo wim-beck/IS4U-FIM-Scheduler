@@ -79,6 +79,10 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Constants\Constants.csproj">
+      <Project>{08bb1b37-eea2-43d6-a4a9-4e2f1e35a753}</Project>
+      <Name>Constants</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RunConfiguration\RunConfiguration.csproj">
       <Project>{bcc86531-b728-488b-9def-d436ef7b1305}</Project>
       <Name>RunConfiguration</Name>

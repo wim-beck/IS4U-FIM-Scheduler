@@ -1,14 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scheduler", "Scheduler\Scheduler.csproj", "{C5F50702-B3A9-43B2-A84E-BCA191FA3E7F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RunConfiguration", "RunConfiguration\RunConfiguration.csproj", "{BCC86531-B728-488B-9DEF-D436EF7B1305}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XML", "XML", "{AE4AF31C-FEFD-405A-BE04-4DFCDF242E54}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constants", "Constants\Constants.csproj", "{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XML", "XML", "{065004C8-BA8B-4245-BA17-2C450E0EABD9}"
 	ProjectSection(SolutionItems) = preProject
 		XML\job_scheduling_data_2_0.xsd = XML\job_scheduling_data_2_0.xsd
 		XML\JobConfiguration.xml = XML\JobConfiguration.xml
+		XML\LogConfiguration.xml = XML\LogConfiguration.xml
 		XML\RunConfiguration.xml = XML\RunConfiguration.xml
 		XML\RunSchedulingData.xsd = XML\RunSchedulingData.xsd
 	EndProjectSection
@@ -43,6 +48,16 @@ Global
 		{BCC86531-B728-488B-9DEF-D436EF7B1305}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{BCC86531-B728-488B-9DEF-D436EF7B1305}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{BCC86531-B728-488B-9DEF-D436EF7B1305}.Release|x86.ActiveCfg = Release|Any CPU
+		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

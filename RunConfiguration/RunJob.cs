@@ -19,6 +19,7 @@
 using System;
 using System.IO;
 using System.Management;
+using IS4U.Constants;
 using Microsoft.Win32;
 using NLog;
 using Quartz;
@@ -32,10 +33,7 @@ namespace IS4U.RunConfiguration
 	[DisallowConcurrentExecution]
 	public class RunJob : IInterruptableJob
 	{
-
 		private SchedulerConfig schedulerConfig;
-		private const string SCHEDULER_CONFIG = "RunConfiguration.xml";
-		private const string SCHEDULER_KEY = @"SYSTEM\CurrentControlSet\Services\IS4UFimScheduler";
 		private Logger logger = LogManager.GetLogger("");
 
 		/// <summary>
@@ -49,7 +47,7 @@ namespace IS4U.RunConfiguration
 				if (context.Trigger.JobDataMap.ContainsKey("RunConfigName"))
 				{
 					string workingDirectory = string.Empty;
-					using (RegistryKey key = Registry.LocalMachine.OpenSubKey(SCHEDULER_KEY, false))
+					using (RegistryKey key = Registry.LocalMachine.OpenSubKey(Constant.SCHEDULER_KEY, false))
 					{
 						if (key != null)
 						{
@@ -59,10 +57,10 @@ namespace IS4U.RunConfiguration
 					if (!string.IsNullOrEmpty(workingDirectory))
 					{
 						string runConfig = context.Trigger.JobDataMap.GetString("RunConfigName");
-						schedulerConfig = new SchedulerConfig(Path.Combine(workingDirectory, SCHEDULER_CONFIG));
+						schedulerConfig = new SchedulerConfig(Path.Combine(workingDirectory, Constant.RUN_CONFIG_FILE));
 						if (schedulerConfig != null)
 						{
-							run(schedulerConfig, runConfig);
+							schedulerConfig.Run(runConfig);
 						}
 						else
 						{
@@ -94,7 +92,7 @@ namespace IS4U.RunConfiguration
 		/// </summary>
 		public void Interrupt()
 		{
-			ManagementScope mgmtScope = new ManagementScope(schedulerConfig.FIM_WMI_NAMESPACE);
+			ManagementScope mgmtScope = new ManagementScope(Constant.FIM_WMI_NAMESPACE);
 			SelectQuery query = new SelectQuery(string.Format("Select * from MIIS_ManagementAgent"));
 			using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(mgmtScope, query))
 			{
@@ -105,32 +103,6 @@ namespace IS4U.RunConfiguration
 						wmiMaObject.InvokeMethod("Stop", new object[] { });
 					}
 				}
-			}
-		}
-
-		/// <summary>
-		/// This method will run the passed run configuration, if it is present in the xml configuration.
-		/// </summary>
-		/// <param name="schedulerConfig">Scheduler configuration.</param>
-		/// <param name="runConfigurationName">Desired run configuration.</param>
-		private void run(SchedulerConfig schedulerConfig, string runConfigurationName)
-		{
-			if (schedulerConfig.RunConfigurations.ContainsKey(runConfigurationName))
-			{
-				LinearSequence runConfiguration = schedulerConfig.RunConfigurations[runConfigurationName];
-				foreach (Step step in runConfiguration.StepsToRun)
-				{
-					// we pass the third parameter to allow execution of several run profiles and
-					// because different run profiles can contain the same sequences.
-					step.Initialize(schedulerConfig.Sequences, runConfiguration.DefaultRunProfile, 0, schedulerConfig.FIM_WMI_NAMESPACE);
-					step.Run();
-					logger.Info("Running step: " + step.Name);
-				}
-				schedulerConfig.DoHouseKeeping();
-			}
-			else
-			{
-				logger.Error(string.Format("Run configuration '{0}' not found.", runConfigurationName));
 			}
 		}
 	}

@@ -18,8 +18,8 @@
  */
 using System;
 using System.Linq;
-using System.Xml.Linq;
 using System.Threading;
+using System.Xml.Linq;
 
 namespace IS4U.RunConfiguration
 {
