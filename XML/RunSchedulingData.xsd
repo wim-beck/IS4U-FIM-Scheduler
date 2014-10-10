@@ -104,6 +104,11 @@
 						<xs:documentation>Action to take. If this is not specified, the default profile of the run configuration will be taken, or the action in a parent sequence if present.</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
+				<xs:attribute name="Seconds" type="xs:int" use="optional">
+					<xs:annotation>
+						<xs:documentation>Number of seconds to sleep. Used in delay step types.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
@@ -116,6 +121,7 @@
 			<xs:pattern value="ManagementAgent"/>
 			<xs:pattern value="LinearSequence"/>
 			<xs:pattern value="ParallelSequence"/>
+			<xs:pattern value="Delay"/>
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>

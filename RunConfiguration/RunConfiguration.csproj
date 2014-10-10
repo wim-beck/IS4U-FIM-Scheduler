@@ -47,6 +47,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Delay.cs" />
     <Compile Include="LinearSequence.cs" />
     <Compile Include="ManagementAgent.cs" />
     <Compile Include="ParallelSequence.cs" />

@@ -53,6 +53,10 @@ namespace IS4U.RunConfiguration
 		/// Number of times this particular step is initialized. Used to detect loops.
 		/// </summary>
 		public int Count { get; set; }
+		/// <summary>
+		/// Number of seconds this particular step will sleep. Used in delay steps.
+		/// </summary>
+		public int Seconds { get; set; }
 
 		#endregion
 
@@ -76,6 +80,17 @@ namespace IS4U.RunConfiguration
 						if (xmlStep.Attribute("Action") != null)
 						{
 							step.Action = xmlStep.Attribute("Action").Value;
+						}
+						if (xmlStep.Attribute("Seconds") != null)
+						{
+							try
+							{
+								step.Seconds = Convert.ToInt32(xmlStep.Attribute("Seconds").Value);
+							}
+							catch (FormatException fe)
+							{
+								throw new Exception("Seconds is not a valid number: " + fe.Message);
+							}
 						}
 						step.Count = 0;
 						return step;

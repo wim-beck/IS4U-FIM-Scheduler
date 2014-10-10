@@ -79,7 +79,10 @@ namespace IS4U.RunConfiguration
 
 		private string configFile;
 
-
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="configFile">Configuration file.</param>
 		public SchedulerConfig(string configFile)
 		{
 			this.configFile = configFile;

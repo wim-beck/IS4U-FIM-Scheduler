@@ -22,6 +22,7 @@
 	<Sequence Name="FIM">
 		<Step Type="ManagementAgent">FIM MA</Step>
 		<Step Type="ManagementAgent" Action="Export">AD MA</Step>
+		<Step Type="Delay" Seconds="10" />
 		<Step Type="ManagementAgent">AD MA</Step>
 		<Step Type="ManagementAgent" Action="Export">FIM MA</Step>
 	</Sequence>
