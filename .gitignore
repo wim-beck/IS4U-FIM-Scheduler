@@ -213,3 +213,10 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+Setup/IS4U FIM Scheduler Installer.nsi
+Setup/README.txt
+Setup/headerLogo.bmp
+Setup/installerIcon.ico
+Setup/is4u.gif
+Setup/license.txt
+XML/LogConfiguration.xml
