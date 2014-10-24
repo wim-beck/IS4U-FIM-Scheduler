@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Specialized;
 using System.IO;
+using System.Management;
 using System.ServiceProcess;
 using System.Threading;
 using IS4U.Constants;
@@ -31,6 +32,9 @@ using Quartz.Impl;
 
 namespace IS4U.Scheduler
 {
+	/// <summary>
+	/// Scheduler class.
+	/// </summary>
 	public partial class Scheduler : ServiceBase
 	{
 		private const int ONDEMAND = 234;
@@ -38,17 +42,22 @@ namespace IS4U.Scheduler
 		private DateTime LastEndTime;
 		private Thread worker;
 		private string runConfigurationFile;
-
-		private static string workingDirectory;
+		private string workingDirectory;
 		private IScheduler scheduler;
 		private Logger logger;
+		private bool running;
+		private bool paused;
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
 		public Scheduler()
 		{
 			InitializeComponent();
 			ServiceName = "IS4U FIM Scheduler";
 			CanPauseAndContinue = true;
-
+			running = false;
+			paused = false;
 			using (RegistryKey key = Registry.LocalMachine.OpenSubKey(Constant.SCHEDULER_KEY, false))
 			{
 				if (key != null)
@@ -79,11 +88,12 @@ namespace IS4U.Scheduler
 			LastEndTime = DateTime.MinValue;
 			while (true)
 			{
-				if (scheduler.GetCurrentlyExecutingJobs().Count == 0)
+				if (scheduler.GetCurrentlyExecutingJobs().Count == 0 && !paused)
 				{
 					scheduler.PauseAll();
 					if (DateTime.Compare(StartSignal, LastEndTime) > 0)
 					{
+						running = true;
 						StartSignal = DateTime.Now;
 						LastEndTime = StartSignal;
 
@@ -97,6 +107,7 @@ namespace IS4U.Scheduler
 							logger.Error("Scheduler configuration not found.");
 							throw new JobExecutionException("Scheduler configuration not found.");
 						}
+						running = false;
 					}
 					scheduler.ResumeAll();
 				}
@@ -164,13 +175,13 @@ namespace IS4U.Scheduler
 
 		/// <summary>
 		/// Pause method. Will stop the scheduler if no jobs are running.
-		/// TODO: implement on demand pause.
 		/// </summary>
 		protected override void OnPause()
 		{
-			if (scheduler.GetCurrentlyExecutingJobs().Count == 0)
+			if (scheduler.GetCurrentlyExecutingJobs().Count == 0 && !running)
 			{
 				base.OnPause();
+				paused = true;
 				scheduler.PauseAll();
 				logger.Info("Scheduler paused.");
 			}
@@ -183,11 +194,11 @@ namespace IS4U.Scheduler
 
 		/// <summary>
 		/// Continue method. Resumes the scheduler.
-		/// TODO: implement on demand continue.
 		/// </summary>
 		protected override void OnContinue()
 		{
 			base.OnContinue();
+			paused = false;
 			scheduler.ResumeAll();
 			logger.Info("Scheduler resumed.");
 		}
@@ -197,10 +208,28 @@ namespace IS4U.Scheduler
 		/// </summary>
 		protected override void OnStop()
 		{
-			foreach (IJobExecutionContext job in scheduler.GetCurrentlyExecutingJobs())
+			if (running)
 			{
-				scheduler.Interrupt(job.JobDetail.Key);
-				logger.Info(string.Format("Scheduler interrupted '{0}' job while stopping the service.", job.JobDetail.Key));
+				ManagementScope mgmtScope = new ManagementScope(Constant.FIM_WMI_NAMESPACE);
+				SelectQuery query = new SelectQuery(string.Format("Select * from MIIS_ManagementAgent"));
+				using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(mgmtScope, query))
+				{
+					foreach (ManagementObject obj in searcher.Get())
+					{
+						using (ManagementObject wmiMaObject = obj)
+						{
+							wmiMaObject.InvokeMethod("Stop", new object[] { });
+						}
+					}
+				}
+			}
+			else
+			{
+				foreach (IJobExecutionContext job in scheduler.GetCurrentlyExecutingJobs())
+				{
+					scheduler.Interrupt(job.JobDetail.Key);
+					logger.Info(string.Format("Scheduler interrupted '{0}' job while stopping the service.", job.JobDetail.Key));
+				}
 			}
 			scheduler.Shutdown();
 			worker.Abort();

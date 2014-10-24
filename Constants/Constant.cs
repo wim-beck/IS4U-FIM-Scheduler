@@ -21,8 +21,6 @@ namespace IS4U.Constants
 	public static class Constant
 	{
 		public const string SCHEDULER_KEY = @"SYSTEM\CurrentControlSet\Services\IS4UFimScheduler";
-		public const string RUNHISTORY_OUTPUT_DIR = "RunHistory";
-		public const string RUNHISTORY_XSL = "ShowRunHistory.xsl";
 		public const string FIM_WMI_NAMESPACE = @"root\MicrosoftIdentityIntegrationServer";
 		public const string RUN_CONFIG_FILE = "RunConfiguration.xml";
 		public const string JOB_CONFIG_FILE = "JobConfiguration.xml";
