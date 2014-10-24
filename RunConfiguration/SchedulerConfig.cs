@@ -35,10 +35,6 @@ namespace IS4U.RunConfiguration
 		private Logger logger = LogManager.GetLogger("");
 
 		/// <summary>
-		/// Flag indicating whether or not to generate reports.
-		/// </summary>
-		public bool GenerateReport { get; internal set; }
-		/// <summary>
 		/// Flag indicating whether or not to clear the run history.
 		/// </summary>
 		public bool ClearRunHistory { get; internal set; }
@@ -54,10 +50,6 @@ namespace IS4U.RunConfiguration
 		/// Delay between start of the management agent runs in a linear sequence.
 		/// </summary>
 		public static int DelayInLinearSequence { get; internal set; }
-		/// <summary>
-		/// Last exported run history timestamp.
-		/// </summary>
-		public DateTime RunHistoryExported { get; internal set; }
 		/// <summary>
 		/// Key: name of the run configuration.
 		/// Value: linear sequence representing a run configuration.
