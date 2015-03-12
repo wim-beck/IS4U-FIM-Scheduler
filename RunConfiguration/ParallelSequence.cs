@@ -24,21 +24,21 @@ namespace IS4U.RunConfiguration
 	/// <summary>
 	/// Represents a parallel sequence.
 	/// </summary>
-	public class ParallelSequence : Step
+	public class ParallelSequence : Sequence
 	{
-		/// <summary>
-		/// Default constructor.
-		/// </summary>
-		public ParallelSequence() { }
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public ParallelSequence() : base() { }
 
 		/// <summary>
 		/// Starts a thread for each step it needs to run.
 		/// </summary>
 		public override void Run()
 		{
-			int delay = SchedulerConfig.DelayInParallelSequence * 1000;
+			int delay = ConfigParameters.DelayInParallelSequence * 1000;
 			List<Thread> threads = new List<Thread>();
-			foreach (Step step in StepsToRun)
+			foreach (Step step in Steps)
 			{
 				threads.Add(new Thread(new ThreadStart(step.Run)));
 			}

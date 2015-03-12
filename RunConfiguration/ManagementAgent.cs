@@ -40,14 +40,14 @@ namespace IS4U.RunConfiguration
 		/// Initialize method. This will initialize the default run profile.
 		/// Since this step does not has to run different steps, the dictionary is not used.
 		/// </summary>
-		/// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
-		/// <param name="defaultProfile">Default run profile.</param>
-		/// <param name="count">Number of times this method is called.</param>
-		/// <param name="fimWmiNamespace">FIM WMI namespace.</param>
-		public override void Initialize(Dictionary<string, List<Step>> sequences, string defaultProfile, int count)
-		{
-			DefaultRunProfile = defaultProfile;
-		}
+        /// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
+        /// <param name="defaultProfile">Default run profile.</param>
+        /// <param name="count">Number of times this method is called.</param>
+        /// <param name="configParameters">Global configuration parameters.</param>
+        public override void Initialize(Dictionary<string, Sequence> sequences, string defaultProfile, int count, GlobalConfig configParameters)
+        {
+            DefaultRunProfile = defaultProfile;
+        }
 
 		/// <summary>
 		/// Runs the default run profile of the run configuration (initialized before) or a predefined run profile

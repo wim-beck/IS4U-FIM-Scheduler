@@ -16,12 +16,6 @@
  * A full copy of the GNU General Public License can be found 
  * here: http://opensource.org/licenses/gpl-3.0.
  */
-using System;
-using System.Collections.Specialized;
-using System.IO;
-using System.Management;
-using System.ServiceProcess;
-using System.Threading;
 using IS4U.Constants;
 using IS4U.RunConfiguration;
 using Microsoft.Win32;
@@ -29,6 +23,12 @@ using NLog;
 using NLog.Config;
 using Quartz;
 using Quartz.Impl;
+using System;
+using System.Collections.Specialized;
+using System.IO;
+using System.Management;
+using System.ServiceProcess;
+using System.Threading;
 
 namespace IS4U.Scheduler
 {

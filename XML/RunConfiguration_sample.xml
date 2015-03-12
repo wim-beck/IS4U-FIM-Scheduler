@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunConfig xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="RunSchedulingData.xsd">
+  <Parameters>
+    <ClearRunHistory>true</ClearRunHistory>
+    <KeepHistory Days="5" />
+    <DelayInParallelSequence Seconds="2" />
+    <DelayInLinearSequence Seconds="2" />
+    <OnDemandSchedule>Delta</OnDemandSchedule>
+  </Parameters>
+  <RunConfigurations>
+    <RunConfiguration Name="Full" Profile="Full import">
+      <Step Type="ManagementAgent">AD MA</Step>
+      <Step Type="Delay" Seconds="25"></Step>
+	  <Step Type="ManagementAgent">FIM MA</Step>
+    </RunConfiguration>
+    <RunConfiguration Name="Delta" Profile="Delta import">
+      <Step Type="LinearSequence">Test</Step>
+      <Step Type="ManagementAgent" Action="Export">AD MA</Step>
+    </RunConfiguration>
+  </RunConfigurations>
+  <Sequences>
+    <Sequence Name="Test">
+      <Step Type="ManagementAgent">FIM MA</Step>
+      <Step Type="ManagementAgent" Action="Export">AD MA</Step>
+    </Sequence>
+  </Sequences>
+</RunConfig>

@@ -23,30 +23,29 @@ namespace IS4U.RunConfiguration
 {
 	public class Delay : Step
 	{
-		/// <summary>
-		/// Default constructor.
-		/// </summary>
-		public Delay() { }
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public Delay() : base() { }
 
-		/// <summary>
-		/// Initialize method.
-		/// Since this step does not has to run different steps, the dictionary is not used.
-		/// </summary>
-		/// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
-		/// <param name="defaultProfile">Default run profile.</param>
-		/// <param name="count">Number of times this method is called.</param>
-		/// <param name="fimWmiNamespace">FIM WMI namespace.</param>
-		public override void Initialize(Dictionary<string, List<Step>> sequences, string defaultProfile, int count)
-		{
-			// No action required.
-		}
+        /// <summary>
+        /// Initialize method.
+        /// </summary>
+        /// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
+        /// <param name="defaultProfile">Default run profile.</param>
+        /// <param name="count">Number of times this method is called.</param>
+        /// <param name="configParameters">Global configuration parameters.</param>
+        public override void Initialize(Dictionary<string, Sequence> sequences, string defaultProfile, int count, GlobalConfig configParameters)
+        {
+            // No action required.
+        }
 
-		/// <summary>
-		/// Sleeps for the configured amount of seconds.
-		/// </summary>
-		public override void Run()
-		{
-			Thread.Sleep(Seconds * 1000);
-		}
+        /// <summary>
+        /// Sleeps for the configured amount of seconds.
+        /// </summary>
+        public override void Run()
+        {
+            Thread.Sleep(Seconds * 1000);
+        }
 	}
 }

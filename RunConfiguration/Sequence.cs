@@ -17,7 +17,6 @@
  * here: http://opensource.org/licenses/gpl-3.0.
  */
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -26,35 +25,39 @@ namespace IS4U.RunConfiguration
 	/// <summary>
 	/// Class representing a sequence.
 	/// </summary>
-	public class Sequence
-	{
-		/// <summary>
-		/// Name of this sequence.
-		/// </summary>
-		public string Name { get; private set; }
-		/// <summary>
-		/// List of steps.
-		/// </summary>
-		public List<Step> Steps { get; private set; }
+    public class Sequence : Step
+    {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Sequence() : base() { }
 
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		/// <param name="sequence"></param>
-		/// <param name="logger"></param>
-		public Sequence(XElement sequence)
-		{
-			if (sequence.Attribute("Name") != null)
-			{
-				Name = sequence.Attribute("Name").Value;
-			}
-			else
-			{
-				Name = Guid.NewGuid().ToString();
-			}
-			Steps = (from step in sequence.Elements("Step")
-							 select Step.GetStep(step)).ToList();
-		}
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="sequence"></param>
+        public Sequence(XElement sequence)
+        {
+            XmlConfig = sequence;
+            if (sequence.Attribute("Name") != null)
+            {
+                Name = sequence.Attribute("Name").Value;
+            }
+            else
+            {
+                Name = Guid.NewGuid().ToString();
+            }
+            Steps = (from step in sequence.Elements("Step")
+                     select Step.GetStep(step)).ToList();
+        }
+
+        /// <summary>
+        /// Throw exception. This should never be executed.
+        /// </summary>
+        public override void Run()
+        {
+            throw new Exception("Object of type Sequence should does not support run operation. Use one of the subtypes of sequence instead.");
+        }
 
 	}
 }

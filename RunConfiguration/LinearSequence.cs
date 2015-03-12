@@ -26,52 +26,53 @@ namespace IS4U.RunConfiguration
 	/// <summary>
 	/// Represents a linear sequence.
 	/// </summary>
-	public class LinearSequence : Step
+	public class LinearSequence : Sequence
 	{
-		/// <summary>
-		/// Default constructor.
-		/// </summary>
-		public LinearSequence() { }
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public LinearSequence() : base() { }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="runConfig">Xml configuration.</param>
+        /// <param name="logger">Logger.</param>
+        public LinearSequence(XElement runConfig)
+        {
+            XmlConfig = runConfig;
+            if (runConfig.Attribute("Name") != null)
+            {
+                Name = runConfig.Attribute("Name").Value;
+            }
+            else
+            {
+                Name = Guid.NewGuid().ToString();
+            }
+            if (runConfig.Attribute("Profile") != null)
+            {
+                DefaultRunProfile = runConfig.Attribute("Profile").Value;
+            }
+            else
+            {
+                DefaultRunProfile = Guid.NewGuid().ToString();
+            }
+            Steps = (from step in runConfig.Elements("Step")
+                     select GetStep(step)).ToList();
+            Count = 0;
+        }
 
 		/// <summary>
-		/// Constructor.
-		/// </summary>
-		/// <param name="runConfig">Xml configuration.</param>
-		/// <param name="logger">Logger.</param>
-		public LinearSequence(XElement runConfig)
-		{
-			if (runConfig.Attribute("Name") != null)
-			{
-				Name = runConfig.Attribute("Name").Value;
-			}
-			else
-			{
-				Name = Guid.NewGuid().ToString();
-			}
-			if (runConfig.Attribute("Profile") != null)
-			{
-				DefaultRunProfile = runConfig.Attribute("Profile").Value;
-			}
-			else
-			{
-				DefaultRunProfile = Guid.NewGuid().ToString();
-			}
-			StepsToRun = (from step in runConfig.Elements("Step")
-										select GetStep(step)).ToList();
-			Count = 0;
-		}
-
-		/// <summary>
-		/// Executes a linear execution of the different steps.
-		/// </summary>
-		public override void Run()
-		{
-			int delay = SchedulerConfig.DelayInLinearSequence * 1000;
-			foreach (Step step in StepsToRun)
-			{
-				step.Run();
-				Thread.Sleep(delay);
-			}
-		}
+        /// Executes a linear execution of the different steps.
+        /// </summary>
+        public override void Run()
+        {
+            int delay = ConfigParameters.DelayInLinearSequence * 1000;
+            foreach (Step step in Steps)
+            {
+                step.Run();
+                Thread.Sleep(delay);
+            }
+        }
 	}
 }

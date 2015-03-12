@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scheduler", "Scheduler\Scheduler.csproj", "{C5F50702-B3A9-43B2-A84E-BCA191FA3E7F}"
 EndProject
@@ -13,10 +13,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XML", "XML", "{065004C8-BA8
 	ProjectSection(SolutionItems) = preProject
 		XML\job_scheduling_data_2_0.xsd = XML\job_scheduling_data_2_0.xsd
 		XML\JobConfiguration.xml = XML\JobConfiguration.xml
+		XML\JobConfiguration_sample.xml = XML\JobConfiguration_sample.xml
 		XML\LogConfiguration.xml = XML\LogConfiguration.xml
 		XML\RunConfiguration.xml = XML\RunConfiguration.xml
+		XML\RunConfiguration_sample.xml = XML\RunConfiguration_sample.xml
 		XML\RunSchedulingData.xsd = XML\RunSchedulingData.xsd
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils", "Utils\Utils.csproj", "{BFAE4431-5263-40A4-8481-6CA2BC309FE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +62,16 @@ Global
 		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{08BB1B37-EEA2-43D6-A4A9-4E2F1E35A753}.Release|x86.ActiveCfg = Release|Any CPU
+		{BFAE4431-5263-40A4-8481-6CA2BC309FE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFAE4431-5263-40A4-8481-6CA2BC309FE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFAE4431-5263-40A4-8481-6CA2BC309FE6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{BFAE4431-5263-40A4-8481-6CA2BC309FE6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{BFAE4431-5263-40A4-8481-6CA2BC309FE6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BFAE4431-5263-40A4-8481-6CA2BC309FE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFAE4431-5263-40A4-8481-6CA2BC309FE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFAE4431-5263-40A4-8481-6CA2BC309FE6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{BFAE4431-5263-40A4-8481-6CA2BC309FE6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{BFAE4431-5263-40A4-8481-6CA2BC309FE6}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

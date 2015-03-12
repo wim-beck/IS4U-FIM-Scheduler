@@ -16,13 +16,13 @@
  * A full copy of the GNU General Public License can be found 
  * here: http://opensource.org/licenses/gpl-3.0.
  */
-using System;
-using System.IO;
-using System.Management;
 using IS4U.Constants;
 using Microsoft.Win32;
 using NLog;
 using Quartz;
+using System;
+using System.IO;
+using System.Management;
 
 namespace IS4U.RunConfiguration
 {
