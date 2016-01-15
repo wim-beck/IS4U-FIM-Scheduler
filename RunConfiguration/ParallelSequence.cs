@@ -23,11 +23,11 @@ using System.Threading;
 
 namespace IS4U.RunConfiguration
 {
-	/// <summary>
-	/// Represents a parallel sequence.
-	/// </summary>
-	public class ParallelSequence : Sequence
-	{
+    /// <summary>
+    /// Represents a parallel sequence.
+    /// </summary>
+    public class ParallelSequence : Sequence
+    {
         private Logger logger = LogManager.GetLogger("");
 
         /// <summary>
@@ -35,21 +35,21 @@ namespace IS4U.RunConfiguration
         /// </summary>
         public ParallelSequence() : base() { }
 
-		/// <summary>
-		/// Starts a thread for each step it needs to run.
-		/// </summary>
+        /// <summary>
+        /// Starts a thread for each step it needs to run.
+        /// </summary>
         /// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
         /// <param name="defaultProfile">Default run profile.</param>
         /// <param name="count">Number of times this method is called.</param>
         /// <param name="configParameters">Global configuration parameters.</param>
         public override void Run(Dictionary<string, Sequence> sequences, string defaultProfile, int count, GlobalConfig configParameters)
-		{
+        {
             string runProfile = defaultProfile;
             if (!string.IsNullOrEmpty(Action))
             {
                 runProfile = Action;
             }
-			int delay = ConfigParameters.DelayInParallelSequence * 1000;
+            int delay = ConfigParameters.DelayInParallelSequence * 1000;
             List<Thread> threads = new List<Thread>();
 
             if (sequences.ContainsKey(Name))
@@ -76,7 +76,7 @@ namespace IS4U.RunConfiguration
             {
                 logger.Error(string.Format("Sequence '{0}' not found.", Name));
             }
-		}
+        }
 
         /// <summary>
         /// 
@@ -85,5 +85,5 @@ namespace IS4U.RunConfiguration
         {
             throw new Exception("Object of type ParallelSequence does not support run operation without parameters.");
         }
-	}
+    }
 }

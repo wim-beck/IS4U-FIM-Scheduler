@@ -21,8 +21,8 @@ using System.Threading;
 
 namespace IS4U.RunConfiguration
 {
-	public class Delay : Step
-	{
+    public class Delay : Step
+    {
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -59,5 +59,5 @@ namespace IS4U.RunConfiguration
         {
             Thread.Sleep(Seconds * 1000);
         }
-	}
+    }
 }

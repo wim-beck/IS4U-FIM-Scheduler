@@ -26,84 +26,84 @@ using System.Management;
 
 namespace IS4U.RunConfiguration
 {
-	/// <summary>
-	/// Job to run the run configurations that are triggered by the scheduler.
-	/// Jobs are not allowed to run concurrent, only one job of this type will be executing on the same time.
-	/// </summary>
-	[DisallowConcurrentExecution]
-	public class RunJob : IInterruptableJob
-	{
-		private SchedulerConfig schedulerConfig;
-		private Logger logger = LogManager.GetLogger("");
+    /// <summary>
+    /// Job to run the run configurations that are triggered by the scheduler.
+    /// Jobs are not allowed to run concurrent, only one job of this type will be executing on the same time.
+    /// </summary>
+    [DisallowConcurrentExecution]
+    public class RunJob : IInterruptableJob
+    {
+        private SchedulerConfig schedulerConfig;
+        private Logger logger = LogManager.GetLogger("");
 
-		/// <summary>
-		/// Execute the run profile specified in the job data map of the trigger.
-		/// </summary>
-		/// <param name="context">Job execution context.</param>
-		public void Execute(IJobExecutionContext context)
-		{
-			try
-			{
-				if (context.Trigger.JobDataMap.ContainsKey("RunConfigName"))
-				{
-					string workingDirectory = string.Empty;
-					using (RegistryKey key = Registry.LocalMachine.OpenSubKey(Constant.SCHEDULER_KEY, false))
-					{
-						if (key != null)
-						{
-							workingDirectory = key.GetValue("Location").ToString();
-						}
-					}
-					if (!string.IsNullOrEmpty(workingDirectory))
-					{
-						string runConfig = context.Trigger.JobDataMap.GetString("RunConfigName");
-						schedulerConfig = new SchedulerConfig(Path.Combine(workingDirectory, Constant.RUN_CONFIG_FILE));
-						if (schedulerConfig != null)
-						{
-							schedulerConfig.Run(runConfig);
-						}
-						else
-						{
-							logger.Error("Scheduler configuration not found.");
-							throw new JobExecutionException("Scheduler configuration not found.");
-						}
-					}
-					else
-					{
-						logger.Error("Working directory not found.");
-						throw new JobExecutionException("Working directory not found.");
-					}
-				}
-				else
-				{
-					logger.Error("No run configuration specified.");
-					throw new JobExecutionException("No run configuration specified.");
-				}
-			}
-			catch (Exception ex)
-			{
+        /// <summary>
+        /// Execute the run profile specified in the job data map of the trigger.
+        /// </summary>
+        /// <param name="context">Job execution context.</param>
+        public void Execute(IJobExecutionContext context)
+        {
+            try
+            {
+                if (context.Trigger.JobDataMap.ContainsKey("RunConfigName"))
+                {
+                    string workingDirectory = string.Empty;
+                    using (RegistryKey key = Registry.LocalMachine.OpenSubKey(Constant.SCHEDULER_KEY, false))
+                    {
+                        if (key != null)
+                        {
+                            workingDirectory = key.GetValue("Location").ToString();
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(workingDirectory))
+                    {
+                        string runConfig = context.Trigger.JobDataMap.GetString("RunConfigName");
+                        schedulerConfig = new SchedulerConfig(Path.Combine(workingDirectory, Constant.RUN_CONFIG_FILE));
+                        if (schedulerConfig != null)
+                        {
+                            schedulerConfig.Run(runConfig);
+                        }
+                        else
+                        {
+                            logger.Error("Scheduler configuration not found.");
+                            throw new JobExecutionException("Scheduler configuration not found.");
+                        }
+                    }
+                    else
+                    {
+                        logger.Error("Working directory not found.");
+                        throw new JobExecutionException("Working directory not found.");
+                    }
+                }
+                else
+                {
+                    logger.Error("No run configuration specified.");
+                    throw new JobExecutionException("No run configuration specified.");
+                }
+            }
+            catch (Exception ex)
+            {
                 logger.Error(string.Concat("Unknown error: ", ex.Message, ex.StackTrace));
-				throw new JobExecutionException(string.Concat("Unknown error: ", ex.Message));
-			}
-		}
+                throw new JobExecutionException(string.Concat("Unknown error: ", ex.Message));
+            }
+        }
 
-		/// <summary>
-		/// Interrupt this job. Invoke 'Stop' on all management agents.
-		/// </summary>
-		public void Interrupt()
-		{
-			ManagementScope mgmtScope = new ManagementScope(Constant.FIM_WMI_NAMESPACE);
-			SelectQuery query = new SelectQuery(string.Format("Select * from MIIS_ManagementAgent"));
-			using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(mgmtScope, query))
-			{
-				foreach (ManagementObject obj in searcher.Get())
-				{
-					using (ManagementObject wmiMaObject = obj)
-					{
-						wmiMaObject.InvokeMethod("Stop", new object[] { });
-					}
-				}
-			}
-		}
-	}
+        /// <summary>
+        /// Interrupt this job. Invoke 'Stop' on all management agents.
+        /// </summary>
+        public void Interrupt()
+        {
+            ManagementScope mgmtScope = new ManagementScope(Constant.FIM_WMI_NAMESPACE);
+            SelectQuery query = new SelectQuery(string.Format("Select * from MIIS_ManagementAgent"));
+            using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(mgmtScope, query))
+            {
+                foreach (ManagementObject obj in searcher.Get())
+                {
+                    using (ManagementObject wmiMaObject = obj)
+                    {
+                        wmiMaObject.InvokeMethod("Stop", new object[] { });
+                    }
+                }
+            }
+        }
+    }
 }

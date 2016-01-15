@@ -25,11 +25,11 @@ using System.Xml.Linq;
 
 namespace IS4U.RunConfiguration
 {
-	/// <summary>
-	/// Represents a linear sequence.
-	/// </summary>
-	public class LinearSequence : Sequence
-	{
+    /// <summary>
+    /// Represents a linear sequence.
+    /// </summary>
+    public class LinearSequence : Sequence
+    {
         private Logger logger = LogManager.GetLogger("");
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace IS4U.RunConfiguration
             Count = 0;
         }
 
-		/// <summary>
+        /// <summary>
         /// Executes a linear execution of the different steps.
         /// </summary>
         /// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
@@ -115,5 +115,5 @@ namespace IS4U.RunConfiguration
                 Thread.Sleep(delay);
             }
         }
-	}
+    }
 }

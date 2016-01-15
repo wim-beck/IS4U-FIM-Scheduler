@@ -24,22 +24,22 @@ using System.Management;
 
 namespace IS4U.RunConfiguration
 {
-	/// <summary>
-	/// Represents a management agent.
-	/// </summary>
-	public class ManagementAgent : Step
-	{
-		private Logger logger = LogManager.GetLogger("");
+    /// <summary>
+    /// Represents a management agent.
+    /// </summary>
+    public class ManagementAgent : Step
+    {
+        private Logger logger = LogManager.GetLogger("");
 
-		/// <summary>
-		/// Default constructor.
-		/// </summary>
-		public ManagementAgent() { }
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public ManagementAgent() { }
 
-		/// <summary>
-		/// Initialize method. This will initialize the default run profile.
-		/// Since this step does not has to run different steps, the dictionary is not used.
-		/// </summary>
+        /// <summary>
+        /// Initialize method. This will initialize the default run profile.
+        /// Since this step does not has to run different steps, the dictionary is not used.
+        /// </summary>
         /// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
         /// <param name="defaultProfile">Default run profile.</param>
         /// <param name="count">Number of times this method is called.</param>
@@ -49,23 +49,23 @@ namespace IS4U.RunConfiguration
             DefaultRunProfile = defaultProfile;
         }
 
-		/// <summary>
-		/// Runs the default run profile of the run configuration (initialized before) or a predefined run profile
-		/// (stored in the Action variable).
-		/// </summary>
+        /// <summary>
+        /// Runs the default run profile of the run configuration (initialized before) or a predefined run profile
+        /// (stored in the Action variable).
+        /// </summary>
         /// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
         /// <param name="defaultProfile">Default run profile.</param>
         /// <param name="count">Number of times this method is called.</param>
         /// <param name="configParameters">Global configuration parameters.</param>
         public override void Run(Dictionary<string, Sequence> sequences, string defaultProfile, int count, GlobalConfig configParameters)
-		{
+        {
             string runProfile = defaultProfile;
-			if (!string.IsNullOrEmpty(Action))
-			{
-				runProfile = Action;
-			}
+            if (!string.IsNullOrEmpty(Action))
+            {
+                runProfile = Action;
+            }
             run(runProfile);
-		}
+        }
 
         /// <summary>
         /// Runs the default run profile of the run configuration (initialized before) or a predefined run profile
@@ -110,5 +110,5 @@ namespace IS4U.RunConfiguration
                 logger.Error(message);
             }
         }
-	}
+    }
 }
