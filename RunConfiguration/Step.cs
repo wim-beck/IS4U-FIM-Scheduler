@@ -123,6 +123,19 @@ namespace IS4U.RunConfiguration
         public abstract void Run();
 
         /// <summary>
+        /// This will initialize the default run profile 
+        /// and the stepsToRun that are part of this step. 
+        /// Then a recursive call is made to initialize the StepsToRun
+        /// of the steps in the current StepsToRun. 
+        /// Finally, it will run the steps with the correct run profile.
+        /// </summary>
+        /// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
+        /// <param name="defaultProfile">Default run profile.</param>
+        /// <param name="count">Number of times this method is called.</param>
+        /// <param name="configParameters">Global configuration parameters.</param>
+        public abstract void Run(Dictionary<string, Sequence> sequences, string defaultProfile, int count, GlobalConfig configParameters);
+
+        /// <summary>
         /// Initialize method. This will initialize the default run profile 
         /// and the stepsToRun that are part of this step. 
         /// Then a recursive call is made to initialize the StepsToRun

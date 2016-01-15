@@ -16,6 +16,8 @@
  * A full copy of the GNU General Public License can be found 
  * here: http://opensource.org/licenses/gpl-3.0.
  */
+using NLog;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -26,6 +28,8 @@ namespace IS4U.RunConfiguration
 	/// </summary>
 	public class ParallelSequence : Sequence
 	{
+        private Logger logger = LogManager.GetLogger("");
+
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -34,24 +38,52 @@ namespace IS4U.RunConfiguration
 		/// <summary>
 		/// Starts a thread for each step it needs to run.
 		/// </summary>
-		public override void Run()
+        /// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
+        /// <param name="defaultProfile">Default run profile.</param>
+        /// <param name="count">Number of times this method is called.</param>
+        /// <param name="configParameters">Global configuration parameters.</param>
+        public override void Run(Dictionary<string, Sequence> sequences, string defaultProfile, int count, GlobalConfig configParameters)
 		{
+            string runProfile = defaultProfile;
+            if (!string.IsNullOrEmpty(Action))
+            {
+                runProfile = Action;
+            }
 			int delay = ConfigParameters.DelayInParallelSequence * 1000;
-			List<Thread> threads = new List<Thread>();
-			foreach (Step step in Steps)
-			{
-				threads.Add(new Thread(new ThreadStart(step.Run)));
-			}
-			foreach (Thread thread in threads)
-			{
-				thread.Start();
-				Thread.Sleep(delay);
-			}
-			// Wait for threads to finish
-			foreach (Thread thread in threads)
-			{
-				thread.Join();
-			}
+            List<Thread> threads = new List<Thread>();
+
+            if (sequences.ContainsKey(Name))
+            {
+                Steps = sequences[Name].Steps;
+                foreach (Step step in Steps)
+                {
+                    // run initialize here, then kick the Run without parameters
+                    step.Initialize(sequences, runProfile, count, configParameters);
+                    threads.Add(new Thread(new ThreadStart(step.Run)));
+                }
+                foreach (Thread thread in threads)
+                {
+                    thread.Start();
+                    Thread.Sleep(delay);
+                }
+                // Wait for threads to finish
+                foreach (Thread thread in threads)
+                {
+                    thread.Join();
+                }
+            }
+            else
+            {
+                logger.Error(string.Format("Sequence '{0}' not found.", Name));
+            }
 		}
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override void Run()
+        {
+            throw new Exception("Object of type ParallelSequence does not support run operation without parameters.");
+        }
 	}
 }

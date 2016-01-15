@@ -98,15 +98,11 @@
       <Name>RunConfiguration</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="Resources\IS4U.Utils.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\NLog.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Quartz.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\C5.dll" />
@@ -115,7 +111,7 @@
     <None Include="Resources\IS4U.Constants.dll" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\IS4U.RunConfiguration.dll" />
+    <Content Include="Resources\IS4U.RunConfiguration.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

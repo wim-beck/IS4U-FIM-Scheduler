@@ -16,7 +16,9 @@
  * A full copy of the GNU General Public License can be found 
  * here: http://opensource.org/licenses/gpl-3.0.
  */
+using NLog;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Xml.Linq;
@@ -28,6 +30,8 @@ namespace IS4U.RunConfiguration
 	/// </summary>
 	public class LinearSequence : Sequence
 	{
+        private Logger logger = LogManager.GetLogger("");
+
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -59,11 +63,48 @@ namespace IS4U.RunConfiguration
             }
             Steps = (from step in runConfig.Elements("Step")
                      select GetStep(step)).ToList();
+            if (logger.IsTraceEnabled)
+            {
+                foreach (Step s in Steps)
+                {
+                    logger.Trace("Step {0}, Type {1}, Action {2}, Profile {3}, Seconds {4}", s.Name, s.GetType().ToString(), s.Action, s.DefaultRunProfile, s.Seconds);
+                }
+            }
             Count = 0;
         }
 
 		/// <summary>
         /// Executes a linear execution of the different steps.
+        /// </summary>
+        /// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
+        /// <param name="defaultProfile">Default run profile.</param>
+        /// <param name="count">Number of times this method is called.</param>
+        /// <param name="configParameters">Global configuration parameters.</param>
+        public override void Run(Dictionary<string, Sequence> sequences, string defaultProfile, int count, GlobalConfig configParameters)
+        {
+            string runProfile = defaultProfile;
+            if (!string.IsNullOrEmpty(Action))
+            {
+                runProfile = Action;
+            }
+            int delay = configParameters.DelayInLinearSequence * 1000;
+            if (sequences.ContainsKey(Name))
+            {
+                Steps = sequences[Name].Steps;
+                foreach (Step step in Steps)
+                {
+                    step.Run(sequences, runProfile, count, configParameters);
+                    Thread.Sleep(delay);
+                }
+            }
+            else
+            {
+                logger.Error(string.Format("Sequence '{0}' not found.", Name));
+            }
+        }
+
+        /// <summary>
+        /// 
         /// </summary>
         public override void Run()
         {

@@ -103,11 +103,8 @@ namespace IS4U.RunConfiguration
                 LinearSequence runConfiguration = RunConfigurations[runConfigurationName];
                 foreach (Step step in runConfiguration.Steps)
                 {
-                    // we pass the third parameter to allow execution of several run profiles and
-                    // because different run profiles can contain the same sequences.
-                    step.Initialize(Sequences, runConfiguration.DefaultRunProfile, 0, ConfigParameters);
-                    step.Run();
-                    logger.Info("Running step: " + step.Name);
+                    logger.Info("Start running step: {0}", step.Name);
+                    step.Run(Sequences, runConfiguration.DefaultRunProfile, 0, ConfigParameters);
                 }
                 if (ConfigParameters.ClearRunHistory)
                 {

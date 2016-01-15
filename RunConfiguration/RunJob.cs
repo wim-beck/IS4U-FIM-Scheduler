@@ -82,7 +82,7 @@ namespace IS4U.RunConfiguration
 			}
 			catch (Exception ex)
 			{
-				logger.Error(string.Concat("Unknown error: ", ex.Message));
+                logger.Error(string.Concat("Unknown error: ", ex.Message, ex.StackTrace));
 				throw new JobExecutionException(string.Concat("Unknown error: ", ex.Message));
 			}
 		}

@@ -43,6 +43,18 @@ namespace IS4U.RunConfiguration
         /// <summary>
         /// Sleeps for the configured amount of seconds.
         /// </summary>
+        /// <param name="sequences">Dictionary with as keys sequence names and a list of seps as values.</param>
+        /// <param name="defaultProfile">Default run profile.</param>
+        /// <param name="count">Number of times this method is called.</param>
+        /// <param name="configParameters">Global configuration parameters.</param>
+        public override void Run(Dictionary<string, Sequence> sequences, string defaultProfile, int count, GlobalConfig configParameters)
+        {
+            Thread.Sleep(Seconds * 1000);
+        }
+
+        /// <summary>
+        /// Sleeps for the configured amount of seconds.
+        /// </summary>
         public override void Run()
         {
             Thread.Sleep(Seconds * 1000);

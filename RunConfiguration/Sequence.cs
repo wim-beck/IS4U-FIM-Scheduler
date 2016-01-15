@@ -16,17 +16,21 @@
  * A full copy of the GNU General Public License can be found 
  * here: http://opensource.org/licenses/gpl-3.0.
  */
+using NLog;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
 namespace IS4U.RunConfiguration
 {
-	/// <summary>
-	/// Class representing a sequence.
-	/// </summary>
+    /// <summary>
+    /// Class representing a sequence.
+    /// </summary>
     public class Sequence : Step
     {
+        private Logger logger = LogManager.GetLogger("");
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -49,6 +53,24 @@ namespace IS4U.RunConfiguration
             }
             Steps = (from step in sequence.Elements("Step")
                      select Step.GetStep(step)).ToList();
+            if (logger.IsTraceEnabled)
+            {
+                logger.Trace("List of steps for '{0}'", Name);
+                foreach (Step s in Steps)
+                {
+                    logger.Trace("Step '{0}', Type '{1}', Action '{2}', Profile '{3}', Seconds '{4}'", s.Name, s.GetType().ToString(), s.Action, s.DefaultRunProfile, s.Seconds);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Throw exception. This should never be executed.
+        /// </summary>
+        public override void Run(Dictionary<string, Sequence> sequences, string defaultProfile, int count, GlobalConfig configParameters)
+        {
+            string msg = "Object of type Sequence does not support run operation. Use one of the subtypes instead.";
+            logger.Error(msg);
+            throw new Exception(msg);
         }
 
         /// <summary>
@@ -56,8 +78,9 @@ namespace IS4U.RunConfiguration
         /// </summary>
         public override void Run()
         {
-            throw new Exception("Object of type Sequence should does not support run operation. Use one of the subtypes of sequence instead.");
+            string msg = "Object of type Sequence does not support run operation. Use one of the subtypes instead.";
+            logger.Error(msg);
+            throw new Exception(msg);
         }
-
-	}
+    }
 }
