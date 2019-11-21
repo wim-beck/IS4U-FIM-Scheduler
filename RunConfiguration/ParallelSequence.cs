@@ -49,7 +49,7 @@ namespace IS4U.RunConfiguration
             {
                 runProfile = Action;
             }
-            int delay = ConfigParameters.DelayInParallelSequence * 1000;
+            int delay = configParameters.DelayInParallelSequence * 1000;
             List<Thread> threads = new List<Thread>();
 
             if (sequences.ContainsKey(Name))
